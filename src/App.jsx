@@ -12,11 +12,21 @@ function App() {
     const [score, setScore] = useState(null);
     const [feedback, setFeedback] = useState('');
     const [audioBlob, setAudioBlob] = useState(null);
+    const [autoPlay, setAutoPlay] = useState(true);
     const recognitionRef = useRef(null);
 
     useEffect(() => {
         loadNewSentence();
     }, []);
+
+    useEffect(() => {
+        if (autoPlay && currentSentence) {
+            setIsPlaying(true);
+            speak(currentSentence.text);
+            const timeout = setTimeout(() => setIsPlaying(false), currentSentence.text.length * 300 + 1000);
+            return () => clearTimeout(timeout);
+        }
+    }, [currentSentence]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const loadNewSentence = () => {
         setCurrentSentence(getRandomSentence());
@@ -103,6 +113,8 @@ function App() {
                         isPlaying={isPlaying}
                         onPlayRecording={handlePlayRecording}
                         hasRecording={!!audioBlob}
+                        autoPlay={autoPlay}
+                        onToggleAutoPlay={() => setAutoPlay(!autoPlay)}
                     />
 
                     <ScoreBoard score={score} feedback={feedback} />
